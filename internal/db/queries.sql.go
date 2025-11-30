@@ -33,13 +33,31 @@ func (q *Queries) GetAllCurrencies(ctx context.Context) ([]AppCurrency, error) {
 	return items, nil
 }
 
-const getCurrency = `-- name: GetCurrency :one
-SELECT code, rate FROM app.currencies WHERE code=$1
+const getTwoCurrencies = `-- name: GetTwoCurrencies :many
+SELECT code, rate FROM app.currencies WHERE code IN ($1, $2)
 `
 
-func (q *Queries) GetCurrency(ctx context.Context, code string) (AppCurrency, error) {
-	row := q.db.QueryRow(ctx, getCurrency, code)
-	var i AppCurrency
-	err := row.Scan(&i.Code, &i.Rate)
-	return i, err
+type GetTwoCurrenciesParams struct {
+	Code   string
+	Code_2 string
+}
+
+func (q *Queries) GetTwoCurrencies(ctx context.Context, arg GetTwoCurrenciesParams) ([]AppCurrency, error) {
+	rows, err := q.db.Query(ctx, getTwoCurrencies, arg.Code, arg.Code_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []AppCurrency
+	for rows.Next() {
+		var i AppCurrency
+		if err := rows.Scan(&i.Code, &i.Rate); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

@@ -1,5 +1,5 @@
 -- name: GetAllCurrencies :many
 SELECT * FROM app.currencies;
 
--- name: GetCurrency :one
-SELECT * FROM app.currencies WHERE code=$1;
+-- name: GetTwoCurrencies :many
+SELECT * FROM app.currencies WHERE code IN ($1, $2);

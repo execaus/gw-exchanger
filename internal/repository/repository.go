@@ -2,10 +2,19 @@ package repository
 
 import (
 	"context"
+	"gw-exchanger/internal/db"
 	"gw-exchanger/pkg"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+//go:generate mockgen -source=repository.go -destination=mocks/mock.go
+
 type Repository interface {
-	GetAllRates(ctx context.Context) (pkg.ExchangeRatesMap, error)
-	GetRate(ctx context.Context, currency pkg.Currency) (pkg.Rate, error)
+	GetAllCurrencies(ctx context.Context) ([]db.AppCurrency, error)
+	GetTwoCurrencies(ctx context.Context, first, second pkg.Currency) (from, to *db.AppCurrency, err error)
+}
+
+func NewRepository(pool *pgxpool.Pool) Repository {
+	return NewPostgresRepository(pool)
 }
