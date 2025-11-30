@@ -6,7 +6,6 @@ import (
 	"gw-exchanger/internal/service"
 
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -15,7 +14,7 @@ type Handler struct {
 	gw_grpc.UnimplementedExchangeServiceServer
 }
 
-func (h *Handler) GetExchangeRates(ctx context.Context, _ *emptypb.Empty, _ ...grpc.CallOption) (*gw_grpc.ExchangeRatesResponse, error) {
+func (h *Handler) GetExchangeRates(ctx context.Context, _ *emptypb.Empty) (*gw_grpc.ExchangeRatesResponse, error) {
 	m, err := h.s.GetExchangeRates(ctx)
 	if err != nil {
 		zap.L().Error(err.Error())
@@ -27,7 +26,7 @@ func (h *Handler) GetExchangeRates(ctx context.Context, _ *emptypb.Empty, _ ...g
 	}, nil
 }
 
-func (h *Handler) GetExchangeRateForCurrency(ctx context.Context, in *gw_grpc.CurrencyRequest, _ ...grpc.CallOption) (*gw_grpc.ExchangeRateResponse, error) {
+func (h *Handler) GetExchangeRateForCurrency(ctx context.Context, in *gw_grpc.CurrencyRequest) (*gw_grpc.ExchangeRateResponse, error) {
 	rate, err := h.s.GetExchangeRateForCurrency(ctx, in.FromCurrency, in.ToCurrency)
 	if err != nil {
 		zap.L().Error(err.Error())
