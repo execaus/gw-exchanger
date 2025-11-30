@@ -35,3 +35,6 @@ vendor/
 
 # Mocks
 **/mocks
+
+# Proto generating files
+./internal/pb
