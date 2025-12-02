@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"gw-exchanger/config"
 	"gw-exchanger/internal/handler"
@@ -21,6 +22,7 @@ func init() {
 }
 
 func main() {
+	ctx := context.Background()
 	cfg := config.LoadConfig()
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", cfg.Server.Port))
@@ -28,7 +30,7 @@ func main() {
 		zap.L().Fatal("failed to listen", zap.Error(err))
 	}
 
-	r, closeConnection := repository.NewRepository(&cfg.Database)
+	r, closeConnection := repository.NewRepository(ctx, &cfg.Database)
 	s := service.NewService(r)
 	h := handler.NewHandler(s)
 

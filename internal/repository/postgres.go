@@ -7,7 +7,6 @@ import (
 	"gw-exchanger/config"
 	"gw-exchanger/internal/db"
 	"gw-exchanger/pkg"
-	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
@@ -56,7 +55,7 @@ func (r *PostgresRepository) GetTwoCurrencies(ctx context.Context, fromCode, toC
 	}
 }
 
-func NewPostgresRepository(cfg *config.DatabaseConfig) (r *PostgresRepository, closeConnection func()) {
+func NewPostgresRepository(ctx context.Context, cfg *config.DatabaseConfig) (r *PostgresRepository, closeConnection func()) {
 	dsn := fmt.Sprintf(
 		"postgresql://%s:%s@%s:%d/%s",
 		cfg.User,
@@ -66,14 +65,10 @@ func NewPostgresRepository(cfg *config.DatabaseConfig) (r *PostgresRepository, c
 		cfg.Name,
 	)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
 	pool, err := pgxpool.New(ctx, dsn)
 	if err != nil {
 		zap.L().Fatal("unable to create pgxpool", zap.Error(err))
 	}
-	defer pool.Close()
 
 	if err = pool.Ping(ctx); err != nil {
 		zap.L().Fatal("unable to ping database", zap.Error(err))
